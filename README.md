@@ -1,110 +1,225 @@
-# Data-Efficient architectures and training for Image classification
 
-This repository contains PyTorch evaluation code, training code and pretrained models for the following papers:
+# DEVR:Distillation Efficient Vison-RWKV
+
+
+This repository contains PyTorch evaluation code, training code and pretrained models for the DEVR:
+
+
+# Model Zoo
+
+We provide baseline DeiT models pretrained on ImageNet 2012.
+
+| name | acc@1 | acc@5 | #params | url |
+| --- | --- | --- | --- | --- |
+| DEVR-tiny | 76.6 | 91.1 | 6.2M | [model](https://dl.fbaipublicfiles.com/deit/deit_tiny_patch16_224-a1311bcf.pth) |
+| DEVR-small | 80.0 | 95.0 | 20.1M| [model](https://dl.fbaipublicfiles.com/deit/deit_small_patch16_224-cd65a155.pth) |
+| DEVR-base | 80.0 | 95.6 | 86M | [model](https://dl.fbaipublicfiles.com/deit/deit_base_patch16_224-b5f2ef4d.pth) |
+
+The models are also available via torch hub.
+Before using it, make sure you have the pytorch-image-models package [`timm==0.3.2`](https://github.com/rwightman/pytorch-image-models) by [Ross Wightman](https://github.com/rwightman) installed. Note that our work relies of the augmentations proposed in this library. 
+
+To load DEVR-base with pretrained weights on ImageNet simply do:
+
+```python
+import torch
+# check you have the right version of timm
+import timm
+assert timm.__version__ == "0.3.2"
+
+# now load it with torchhub
+model = torch.hub.load('', 'devr_base_patch16_224', pretrained=True)
+```
+
+Additionnally, we provide a [Colab notebook]() which goes over the steps needed to perform inference with DEVR.
+
+# Usage
+
+First, clone the repository locally:
+```
+git clone https://github.com/
+```
+Then, install PyTorch 1.7.0+ and torchvision 0.8.1+ and [pytorch-image-models 0.3.2](https://github.com/rwightman/pytorch-image-models):
+
+```
+conda install -c pytorch pytorch torchvision
+pip install timm==0.3.2
+```
+
+## Data preparation
+
+Download and extract ImageNet train and val images from http://image-net.org/.
+The directory structure is the standard layout for the torchvision [`datasets.ImageFolder`](https://pytorch.org/docs/stable/torchvision/datasets.html#imagefolder), and the training and validation data is expected to be in the `train/` folder and `val` folder respectively:
+
+```
+/path/to/imagenet/
+  train/
+    class1/
+      img1.jpeg
+    class2/
+      img2.jpeg
+  val/
+    class1/
+      img3.jpeg
+    class2/
+      img4.jpeg
+```
+
+## Evaluation
+To evaluate a pre-trained DEVR-base on ImageNet val with a single GPU run:
+```
+python main.py --eval --resume https://dl.fbaipublicfiles.com/deit/deit_base_patch16_224-b5f2ef4d.pth --data-path /path/to/imagenet
+```
+This should give
+```
+* Acc@1 81.846 Acc@5 95.594 loss 0.820
+```
+
+For DEVR-small, run:
+```
+python main.py --eval --resume https://dl.fbaipublicfiles.com/deit/deit_small_patch16_224-cd65a155.pth --model deit_small_patch16_224 --data-path /path/to/imagenet
+```
+giving
+```
+* Acc@1 79.854 Acc@5 94.968 loss 0.881
+```
+
+Note that DEVR-small is *not* the same model as in Timm. 
+
+And for DEVR-tiny:
+```
+python main.py --eval --resume https://dl.fbaipublicfiles.com/deit/deit_tiny_patch16_224-a1311bcf.pth --model deit_tiny_patch16_224 --data-path /path/to/imagenet
+```
+which should give
+```
+* Acc@1 72.202 Acc@5 91.124 loss 1.219
+```
+
+Here you'll find the command-lines to reproduce the inference results for the distilled and finetuned models
+
 <details>
+
 <summary>
-  <a href="README_deit.md">DeiT</a> Data-Efficient Image Transformers, ICML 2021 [<b>bib</b>]
+deit_base_distilled_patch16_224
 </summary>
 
 ```
-@InProceedings{pmlr-v139-touvron21a,
-  title =     {Training data-efficient image transformers &amp; distillation through attention},
-  author =    {Touvron, Hugo and Cord, Matthieu and Douze, Matthijs and Massa, Francisco and Sablayrolles, Alexandre and Jegou, Herve},
-  booktitle = {International Conference on Machine Learning},
-  pages =     {10347--10357},
-  year =      {2021},
-  volume =    {139},
-  month =     {July}
-}
+python main.py --eval --model deit_base_distilled_patch16_224 --resume https://dl.fbaipublicfiles.com/deit/deit_base_distilled_patch16_224-df68dfff.pth
 ```
+giving
+```
+* Acc@1 83.372 Acc@5 96.482 loss 0.685
+```
+
 </details>
+
+
 <details>
+
 <summary>
-<a href="README_cait.md">CaiT</a> (Going deeper with Image Transformers), ICCV 2021  [<b>bib</b>]
+deit_small_distilled_patch16_224
 </summary>
 
 ```
-@InProceedings{Touvron_2021_ICCV,
-    author    = {Touvron, Hugo and Cord, Matthieu and Sablayrolles, Alexandre and Synnaeve, Gabriel and J\'egou, Herv\'e},
-    title     = {Going Deeper With Image Transformers},
-    booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
-    month     = {October},
-    year      = {2021},
-    pages     = {32-42}
-}
+python main.py --eval --model deit_small_distilled_patch16_224 --resume https://dl.fbaipublicfiles.com/deit/deit_small_distilled_patch16_224-649709d9.pth
 ```
+giving
+```
+* Acc@1 81.164 Acc@5 95.376 loss 0.752
+```
+
 </details>
+
 <details>
+
 <summary>
-<a href="README_resmlp.md">ResMLP</a> (ResMLP: Feedforward networks for image classification with data-efficient training), TPAMI 2022 [<b>bib</b>]
+deit_tiny_distilled_patch16_224
 </summary>
 
 ```
-@article{touvron2021resmlp,
-  title={ResMLP: Feedforward networks for image classification with data-efficient training},
-  author={Hugo Touvron and Piotr Bojanowski and Mathilde Caron and Matthieu Cord and Alaaeldin El-Nouby and Edouard Grave and Gautier Izacard and Armand Joulin and Gabriel Synnaeve and Jakob Verbeek and Herv'e J'egou},
-  journal={arXiv preprint arXiv:2105.03404},
-  year={2021},
-}
+python main.py --eval --model deit_tiny_distilled_patch16_224 --resume https://dl.fbaipublicfiles.com/deit/deit_tiny_distilled_patch16_224-b40b3cf7.pth
 ```
+giving
+```
+* Acc@1 74.476 Acc@5 91.920 loss 1.021
+```
+
 </details>
+
 <details>
+
 <summary>
-<a href="README_patchconvnet.md">PatchConvnet</a> (Augmenting Convolutional networks with attention-based aggregation) [<b>bib</b>]
+deit_base_patch16_384
 </summary>
 
 ```
-@article{touvron2021patchconvnet,
-  title={Augmenting Convolutional networks with attention-based aggregation},
-  author={Hugo Touvron and Matthieu Cord and Alaaeldin El-Nouby and Piotr Bojanowski and Armand Joulin and Gabriel Synnaeve and Jakob Verbeek and Herve Jegou},
-  journal={arXiv preprint arXiv:2112.13692},
-  year={2021},
-}
+python main.py --eval --model deit_base_patch16_384 --input-size 384 --resume https://dl.fbaipublicfiles.com/deit/deit_base_patch16_384-8de9b5d1.pth
 ```
+giving
+```
+* Acc@1 82.890 Acc@5 96.222 loss 0.764
+```
+
 </details>
+
 <details>
+
 <summary>
-<a href="README_3things.md">3Things</a> (Three things everyone should know about Vision Transformers), ECCV 2022 [<b>bib</b>]
+deit_base_distilled_patch16_384
 </summary>
 
 ```
-@article{Touvron2022ThreeTE,
-  title={Three things everyone should know about Vision Transformers},
-  author={Hugo Touvron and Matthieu Cord and Alaaeldin El-Nouby and Jakob Verbeek and Herve Jegou},
-  journal={arXiv preprint arXiv:2203.09795},
-  year={2022},
-}
+python main.py --eval --model deit_base_distilled_patch16_384 --input-size 384 --resume https://dl.fbaipublicfiles.com/deit/deit_base_distilled_patch16_384-d0272ac0.pth
 ```
+giving
+```
+* Acc@1 85.224 Acc@5 97.186 loss 0.636
+```
+
 </details>
-<details>
-<summary>
-<a href="README_revenge.md">DeiT III</a> (DeiT III: Revenge of the ViT), ECCV 2022 [<b>bib</b>]
-</summary>
+
+## Training
+To train DeiT-small and Deit-tiny on ImageNet on a single node with 4 gpus for 300 epochs run:
+
+DeiT-small
+```
+python -m torch.distributed.launch --nproc_per_node=4 --use_env main.py --model deit_small_patch16_224 --batch-size 256 --data-path /path/to/imagenet --output_dir /path/to/save
+```
+
+DeiT-tiny
+```
+python -m torch.distributed.launch --nproc_per_node=4 --use_env main.py --model deit_tiny_patch16_224 --batch-size 256 --data-path /path/to/imagenet --output_dir /path/to/save
+```
+
+
+### Multinode training
+
+Distributed training is available via Slurm and [submitit](https://github.com/facebookincubator/submitit):
 
 ```
-@article{Touvron2022DeiTIR,
-  title={DeiT III: Revenge of the ViT},
-  author={Hugo Touvron and Matthieu Cord and Herve Jegou},
-  journal={arXiv preprint arXiv:2204.07118},
-  year={2022},
-}
+pip install submitit
 ```
-</details>
-<details>
-<summary>
-<a href="README_cosub.md">Cosub</a> (Co-training 2L Submodels for Visual Recognition), CVPR 2023 [<b>bib</b>]
-</summary>
+
+To train DeiT-base model on ImageNet on 2 nodes with 8 gpus each for 300 epochs:
 
 ```
-@article{Touvron2022Cotraining2S,
-  title={Co-training 2L Submodels for Visual Recognition},
-  author={Hugo Touvron and Matthieu Cord and Maxime Oquab and Piotr Bojanowski and Jakob Verbeek and Herv'e J'egou},
-  journal={arXiv preprint arXiv:2212.04884},
-  year={2022},
-}
+python run_with_submitit.py --model deit_base_patch16_224 --data-path /path/to/imagenet
 ```
-</details>
-If you find this repository useful, please consider giving a star ⭐ and cite the relevant papers. 
+
+To train DeiT-base with hard distillation using a RegNetY-160 as teacher, on 2 nodes with 8 GPUs with 32GB each for 300 epochs (make sure that the model weights for the teacher have been downloaded before to the correct location, to avoid multiple workers writing to the same file):
+```
+python run_with_submitit.py --model deit_base_distilled_patch16_224 --distillation-type hard --teacher-model regnety_160 --teacher-path https://dl.fbaipublicfiles.com/deit/regnety_160-a5fe301d.pth --use_volta32
+```
+
+To finetune a DeiT-base on 384 resolution images for 30 epochs, starting from a DeiT-base trained on 224 resolution images, do (make sure that the weights to the original model have been downloaded before, to avoid multiple workers writing to the same file):
+```
+python run_with_submitit.py --model deit_base_patch16_384 --batch-size 32 --finetune https://dl.fbaipublicfiles.com/deit/deit_base_patch16_224-b5f2ef4d.pth --input-size 384 --use_volta32 --nodes 2 --lr 5e-6 --weight-decay 1e-8 --epochs 30 --min-lr 5e-6
+```
+
+### Other: Unofficial Implementations and Tutorial
+
+ - [TensorFlow](https://github.com/sayakpaul/deit-tf) by [Sayak Paul](https://github.com/sayakpaul)
+ - [Tutorial](https://github.com/sayakpaul/probing-vits/) by [Aritra Roy Gosthipaty](https://github.com/ariG23498) and [Sayak Paul](https://github.com/sayakpaul)
+
 
 # License
 This repository is released under the Apache 2.0 license as found in the [LICENSE](LICENSE) file.
