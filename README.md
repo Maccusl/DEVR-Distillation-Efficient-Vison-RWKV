@@ -11,9 +11,9 @@ We provide baseline DeiT models pretrained on ImageNet 2012.
 
 | name | acc@1 | acc@5 | #params | url |
 | --- | --- | --- | --- | --- |
-| DEVR-tiny | 76.6 | 91.1 | 6.2M | [model](https://dl.fbaipublicfiles.com/deit/deit_tiny_patch16_224-a1311bcf.pth) |
-| DEVR-small | 80.0 | 95.0 | 20.1M| [model](https://dl.fbaipublicfiles.com/deit/deit_small_patch16_224-cd65a155.pth) |
-| DEVR-base | 80.0 | 95.6 | 86M | [model](https://dl.fbaipublicfiles.com/deit/deit_base_patch16_224-b5f2ef4d.pth) |
+| DEVR-tiny | 76.6 | 91.1 | 6.3M | [model]() |
+| DEVR-small | 81.7 | 96.1 | 20.9M| coming soon |
+| DEVR-base | 83.0 | 97.3 | 88.9M | coming soon |
 
 The models are also available via torch hub.
 Before using it, make sure you have the pytorch-image-models package [`timm==0.3.2`](https://github.com/rwightman/pytorch-image-models) by [Ross Wightman](https://github.com/rwightman) installed. Note that our work relies of the augmentations proposed in this library. 
