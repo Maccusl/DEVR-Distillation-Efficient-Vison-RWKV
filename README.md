@@ -11,7 +11,7 @@ We provide baseline DEVR models pretrained on ImageNet 2012.
 
 | name | acc@1 | acc@5 | #params | url |
 | --- | --- | --- | --- | --- |
-| DEVR-tiny | 76.6 | 91.1 | 6.3M | [model](https://github.com/Maccusl/DEVR-Distillation-Efficient-Vison-RWKV/blob/master/devr_t.pth) |
+| DEVR-tiny | 76.6 | 91.1 | 6.3M | [model]() |
 | DEVR-small | 81.7 | 96.1 | 20.9M| coming soon |
 | DEVR-base | 83.0 | 97.3 | 88.9M | coming soon |
 
