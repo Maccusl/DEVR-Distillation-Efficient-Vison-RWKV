@@ -7,7 +7,7 @@ This repository contains PyTorch evaluation code, training code and pretrained m
 
 # Model Zoo
 
-We provide baseline DeiT models pretrained on ImageNet 2012.
+We provide baseline DEVR models pretrained on ImageNet 2012.
 
 | name | acc@1 | acc@5 | #params | url |
 | --- | --- | --- | --- | --- |
