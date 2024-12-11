@@ -11,7 +11,7 @@ We provide baseline DeiT models pretrained on ImageNet 2012.
 
 | name | acc@1 | acc@5 | #params | url |
 | --- | --- | --- | --- | --- |
-| DEVR-tiny | 76.6 | 91.1 | 6.3M | [model]() |
+| DEVR-tiny | 76.6 | 91.1 | 6.3M | [model](https://github.com/Maccusl/DEVR-Distillation-Efficient-Vison-RWKV/blob/master/devr_t.pth) |
 | DEVR-small | 81.7 | 96.1 | 20.9M| coming soon |
 | DEVR-base | 83.0 | 97.3 | 88.9M | coming soon |
 
@@ -67,162 +67,33 @@ The directory structure is the standard layout for the torchvision [`datasets.Im
 ## Evaluation
 To evaluate a pre-trained DEVR-base on ImageNet val with a single GPU run:
 ```
-python main.py --eval --resume https://dl.fbaipublicfiles.com/deit/deit_base_patch16_224-b5f2ef4d.pth --data-path /path/to/imagenet
+python main.py --eval --resume devr_t.pth --data-path /path/to/imagenet
 ```
 This should give
 ```
-* Acc@1 81.846 Acc@5 95.594 loss 0.820
+* Acc@1 76.662 Acc@5 93.168 loss 1.169
 ```
 
-For DEVR-small, run:
-```
-python main.py --eval --resume https://dl.fbaipublicfiles.com/deit/deit_small_patch16_224-cd65a155.pth --model deit_small_patch16_224 --data-path /path/to/imagenet
-```
-giving
-```
-* Acc@1 79.854 Acc@5 94.968 loss 0.881
-```
 
-Note that DEVR-small is *not* the same model as in Timm. 
-
-And for DEVR-tiny:
-```
-python main.py --eval --resume https://dl.fbaipublicfiles.com/deit/deit_tiny_patch16_224-a1311bcf.pth --model deit_tiny_patch16_224 --data-path /path/to/imagenet
-```
-which should give
-```
-* Acc@1 72.202 Acc@5 91.124 loss 1.219
-```
-
-Here you'll find the command-lines to reproduce the inference results for the distilled and finetuned models
-
-<details>
-
-<summary>
-deit_base_distilled_patch16_224
-</summary>
-
-```
-python main.py --eval --model deit_base_distilled_patch16_224 --resume https://dl.fbaipublicfiles.com/deit/deit_base_distilled_patch16_224-df68dfff.pth
-```
-giving
-```
-* Acc@1 83.372 Acc@5 96.482 loss 0.685
-```
-
-</details>
-
-
-<details>
-
-<summary>
-deit_small_distilled_patch16_224
-</summary>
-
-```
-python main.py --eval --model deit_small_distilled_patch16_224 --resume https://dl.fbaipublicfiles.com/deit/deit_small_distilled_patch16_224-649709d9.pth
-```
-giving
-```
-* Acc@1 81.164 Acc@5 95.376 loss 0.752
-```
-
-</details>
-
-<details>
-
-<summary>
-deit_tiny_distilled_patch16_224
-</summary>
-
-```
-python main.py --eval --model deit_tiny_distilled_patch16_224 --resume https://dl.fbaipublicfiles.com/deit/deit_tiny_distilled_patch16_224-b40b3cf7.pth
-```
-giving
-```
-* Acc@1 74.476 Acc@5 91.920 loss 1.021
-```
-
-</details>
-
-<details>
-
-<summary>
-deit_base_patch16_384
-</summary>
-
-```
-python main.py --eval --model deit_base_patch16_384 --input-size 384 --resume https://dl.fbaipublicfiles.com/deit/deit_base_patch16_384-8de9b5d1.pth
-```
-giving
-```
-* Acc@1 82.890 Acc@5 96.222 loss 0.764
-```
-
-</details>
-
-<details>
-
-<summary>
-deit_base_distilled_patch16_384
-</summary>
-
-```
-python main.py --eval --model deit_base_distilled_patch16_384 --input-size 384 --resume https://dl.fbaipublicfiles.com/deit/deit_base_distilled_patch16_384-d0272ac0.pth
-```
-giving
-```
-* Acc@1 85.224 Acc@5 97.186 loss 0.636
-```
-
-</details>
 
 ## Training
-To train DeiT-small and Deit-tiny on ImageNet on a single node with 4 gpus for 300 epochs run:
+To train DEVR-small and DEVR-tiny with hard distillation using a ConvneXt as teacher,on ImageNet on a single node with single gpus for 300 epochs run:
 
-DeiT-small
+DEVR-small
 ```
-python -m torch.distributed.launch --nproc_per_node=4 --use_env main.py --model deit_small_patch16_224 --batch-size 256 --data-path /path/to/imagenet --output_dir /path/to/save
-```
-
-DeiT-tiny
-```
-python -m torch.distributed.launch --nproc_per_node=4 --use_env main.py --model deit_tiny_patch16_224 --batch-size 256 --data-path /path/to/imagenet --output_dir /path/to/save
+python --model devr_small --batch-size 256 --distillation-type hard --teacher-model convnext_small --data-path /path/to/imagenet --output_dir /path/to/save
 ```
 
-
-### Multinode training
-
-Distributed training is available via Slurm and [submitit](https://github.com/facebookincubator/submitit):
-
+DEVR-tiny
 ```
-pip install submitit
+python --model devr_tiny --batch-size 256 --distillation-type hard --teacher-model convnext_tiny --data-path /path/to/imagenet --output_dir /path/to/save
 ```
 
-To train DeiT-base model on ImageNet on 2 nodes with 8 gpus each for 300 epochs:
 
-```
-python run_with_submitit.py --model deit_base_patch16_224 --data-path /path/to/imagenet
-```
 
-To train DeiT-base with hard distillation using a RegNetY-160 as teacher, on 2 nodes with 8 GPUs with 32GB each for 300 epochs (make sure that the model weights for the teacher have been downloaded before to the correct location, to avoid multiple workers writing to the same file):
-```
-python run_with_submitit.py --model deit_base_distilled_patch16_224 --distillation-type hard --teacher-model regnety_160 --teacher-path https://dl.fbaipublicfiles.com/deit/regnety_160-a5fe301d.pth --use_volta32
-```
-
-To finetune a DeiT-base on 384 resolution images for 30 epochs, starting from a DeiT-base trained on 224 resolution images, do (make sure that the weights to the original model have been downloaded before, to avoid multiple workers writing to the same file):
-```
-python run_with_submitit.py --model deit_base_patch16_384 --batch-size 32 --finetune https://dl.fbaipublicfiles.com/deit/deit_base_patch16_224-b5f2ef4d.pth --input-size 384 --use_volta32 --nodes 2 --lr 5e-6 --weight-decay 1e-8 --epochs 30 --min-lr 5e-6
-```
-
-### Other: Unofficial Implementations and Tutorial
-
- - [TensorFlow](https://github.com/sayakpaul/deit-tf) by [Sayak Paul](https://github.com/sayakpaul)
- - [Tutorial](https://github.com/sayakpaul/probing-vits/) by [Aritra Roy Gosthipaty](https://github.com/ariG23498) and [Sayak Paul](https://github.com/sayakpaul)
 
 
 # License
 This repository is released under the Apache 2.0 license as found in the [LICENSE](LICENSE) file.
 
-# Contributing
-We actively welcome your pull requests! Please see [CONTRIBUTING.md](.github/CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md) for more info.
+
