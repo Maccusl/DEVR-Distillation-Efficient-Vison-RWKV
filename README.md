@@ -30,7 +30,6 @@ assert timm.__version__ == "0.3.2"
 model = torch.hub.load('', 'devr_base_patch16_224', pretrained=True)
 ```
 
-Additionnally, we provide a [Colab notebook]() which goes over the steps needed to perform inference with DEVR.
 
 # Usage
 
