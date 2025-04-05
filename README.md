@@ -35,7 +35,7 @@ model = torch.hub.load('', 'devr_base_patch16_224', pretrained=True)
 
 First, clone the repository locally:
 ```
-git clone https://github.com/
+git clone https://github.com/Maccusl/DEVR-Distillation-Efficient-Vison-RWKV.git
 ```
 Then, install PyTorch 1.7.0+ and torchvision 0.8.1+ and [pytorch-image-models 0.3.2](https://github.com/rwightman/pytorch-image-models):
 
